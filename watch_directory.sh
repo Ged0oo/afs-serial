@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# Directory to watch
-WATCH_DIR="/path/to/your/directory"
+# Set your local directory to monitor
+WATCH_DIR="/home/nagy/Desktop/grad/Embedded/jenkins"
 
-# Jenkins URL and Job Information
-JENKINS_URL="http://<JENKINS_URL>"
-JENKINS_JOB_NAME="<JENKINS_JOB_NAME>"
-JENKINS_USER="<JENKINS_USER>"
-JENKINS_API_TOKEN="<JENKINS_API_TOKEN>"
+# Jenkins URL and API token (you need to create an API token for your Jenkins user)
+JENKINS_URL="http://localhost:8080/job/PushToGitHub/build"
+JENKINS_USER="admin"
+JENKINS_API_TOKEN="118dd9fb4f2f80234536fbd9fcad10442e"
 
-# Watch for changes in the directory and subdirectories
-while inotifywait -r -e modify,create,delete $WATCH_DIR; do
-    # Trigger Jenkins job using its REST API
-    curl -X POST "$JENKINS_URL/job/$JENKINS_JOB_NAME/build" --user "$JENKINS_USER:$JENKINS_API_TOKEN"
-    echo "Jenkins job triggered!"
+# Monitor directory for changes
+inotifywait -m -r -e modify,create,delete "$WATCH_DIR" |
+while read path action file; do
+    echo "Change detected: $action $file in $path"
+    
+    # Trigger Jenkins job
+    curl -X POST "$JENKINS_URL" --user "$JENKINS_USER:$JENKINS_API_TOKEN"
 done
-
